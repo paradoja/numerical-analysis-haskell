@@ -1,13 +1,17 @@
 module NA.Image
-    ( readBMP
-    , writeBMP
-    , Coordinate
+    ( Coordinate
     , Channel
     , Image (..)
+    ,readBMP
+    , writeBMP
+    , imap
+    , cfold
+    , cfold1
     )
 where
 
 import Data.Word
+import qualified Data.List as L
 import Data.Array.Unboxed
 import Data.ByteString as BS
 import qualified Codec.BMP as C
@@ -31,6 +35,15 @@ writeBMP fileName img@(Image r _ _) = do
   let ((h0, w0), (h1, w1)) = bounds r
   let bmp = C.packRGBA32ToBMP (w1-w0+1) (h1-h0+1) rgba
   C.writeBMP fileName bmp
+
+imap :: (Channel a -> Channel b) -> Image a -> Image b
+imap f (Image r g b) = Image (f r) (f g) (f b)
+
+cfold :: (Ix i, IArray a b) => (c -> b -> c) -> c -> a i b -> c
+cfold f ini = L.foldl' f ini . elems
+
+cfold1 :: (Ix i, IArray a c) => (c -> c -> c) -> a i c -> c
+cfold1 f = L.foldl1' f . elems
 
 toImage :: ByteString -> Int -> Int -> (Image Word8, Int, Int)
 toImage rgba width height = (Image reds greens blues, width, height)

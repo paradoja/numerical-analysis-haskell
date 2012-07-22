@@ -1,6 +1,8 @@
+{-# LANGUAGE FlexibleContexts #-}
 module NA.Image.Utils
     ( channelToDouble
     , channelToWord8
+    , normalise
     , duplicate
     )
 where
@@ -16,6 +18,14 @@ channelToDouble = amap fromIntegral
 
 channelToWord8 :: Channel Double -> Channel Word8
 channelToWord8 = amap truncate
+
+normalise :: (Fractional b, Ord b, IArray UArray b) => Image b -> Image b
+normalise = imap normaliseChannel
+
+normaliseChannel  :: (Fractional e, Ord e, Ix i, IArray a e) => a i e -> a i e
+normaliseChannel c = let cMax = cfold1 max c
+                         cMin = cfold1 min c
+                     in amap (\x -> 255*(x-cMin)/(cMax-cMin)) c
 
 duplicate :: Image Word8 -> Image Word8 -> Image Word8
 duplicate (Image r1 g1 b1) (Image r2 g2 b2) = Image r g b
