@@ -50,7 +50,7 @@ duplicate (Image r1 g1 b1) (Image r2 g2 b2) = Image r g b
 duplicateChannel :: Channel Word8 -> Channel Word8 -> Channel Word8
 duplicateChannel c1 c2 = runSTUArray $ do
                            dup <- newArray ((h0, w0), (h1, width)) 0
-                           forM_ (Prelude.reverse $ range ((h0+10,w0), (h1-10,w1))) $ \(y,x) -> do
+                           forM_ (Prelude.reverse $ range ((h0,w0), (h1,w1))) $ \(y,x) -> do
                                          let x' = x + (w1-w0+1) + 4 + w0 -1
                                          writeArray dup (y,x ) $ c1!(y,x)
                                          writeArray dup (y,x') $ c2!(y,x)
