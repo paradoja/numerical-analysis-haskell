@@ -45,22 +45,21 @@ duplicateChannel c1 c2 = runSTUArray $ do
     where ((h0, w0), (h1, w1)) = bounds c1
           width  = (w1-w0+1)*2 + 4 + w0 - 1
 
+toHSV :: (Integral e, IArray UArray e, IArray a e) => Image e -> (a Coordinate e, a Coordinate e, a Coordinate e)
+toHSV (Image r g b) = let triplets = zip3 (elems r) (elems g) (elems b)
+                          (h, s, v) = unzip3 $ map (getHSV 0) triplets
+                          sizes = bounds r
+                          mkArray = array sizes . zip (range sizes)
+                      in (mkArray h, mkArray s, mkArray v)
 
-toHSV img@(Image r g b) = let triplets = zip3 (elems r) (elems g) (elems b)
-                              (hl, sl, vl) = unzip3 $ map (getHSV 0) triplets
-                              sizes = bounds r
-                              mkArray = array sizes . zip (range sizes)
-                              h = mkArray hl
-                              s = mkArray sl
-                              v = mkArray vl
-                          in (h, s, v)
-
+getHSV :: Integral t => t -> (t, t, t) -> (t, t, t)
 getHSV disp triplet@(x, y, z)
     | cMax == x = finishHSV triplet cMin disp
     | otherwise = getHSV (disp+85) (y, z, x)
     where cMax = maximum [x, y, z]
           cMin = minimum [x, y, z]
 
+finishHSV :: Integral t => (t, t, t) -> t -> t -> (t, t, t)
 finishHSV (x, y, z) cMin disp = let v = x
                                     s = x - cMin
                                     h = 43 * (y - z) `div` s + disp
