@@ -2,7 +2,7 @@ module NA.Image
     ( Coordinate
     , Channel
     , Image (..)
-    ,readBMP
+    , readBMP
     , writeBMP
     , imap
     , cfold
